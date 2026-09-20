@@ -1,0 +1,13 @@
+root: ./docs/
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md
+
+redirects:
+  overview: README.md
+  introduction: README.md
+  quickstart: developers/quickstart.md
+  api: developers/api-reference.md
+  contracts: developers/contracts.md
+  security: architecture/security.md
