@@ -1,0 +1,568 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Precursor Intro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600&display=block" rel="stylesheet">
+<style>
+:root{
+  --canvas:#060607; --surface:#0d0e10; --haze:#131417; --line:rgb(255 255 255/.085);
+  --navy:#f4f5f7; --tide:#a3a8b2; --fog:#6d727c; --pale:#43464d; --accent:#8f98a8;
+  --lagoon:#e6ebf4; --leaf:#34d399; --rose:#f0596b; --amber:#f2a93b;
+  --display:"Space Grotesk",sans-serif; --sans:"Geist",sans-serif; --mono:"Geist Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:var(--canvas);color:var(--navy);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--canvas)}
+.abs{position:absolute}
+.scene{position:absolute;inset:0;opacity:0;will-change:transform,opacity}
+.display{font-family:var(--display);font-weight:500;letter-spacing:-.04em;line-height:1}
+.mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em}
+.accent{color:var(--accent)}
+.line{display:block;overflow:hidden;padding-bottom:.12em;margin-bottom:-.12em}
+.w{display:inline-block;will-change:transform}
+
+/* atmosphere */
+#bg{inset:-60px;background:url(a/bg.png) center/cover no-repeat;opacity:0;will-change:transform,opacity}
+#glow{width:1500px;height:1100px;border-radius:50%;background:radial-gradient(ellipse at center,rgb(230 235 244/.13),transparent 62%);filter:blur(20px)}
+#horizon{left:50%;top:0;height:1px;width:900px;margin-left:-450px;background:linear-gradient(90deg,transparent,rgb(255 255 255/.7),transparent);box-shadow:0 0 22px 2px rgb(230 235 244/.35)}
+#beam{left:1830px;top:40px;width:1px;height:1300px;background:linear-gradient(180deg,transparent,rgb(255 255 255/.6) 12%,rgb(255 255 255/.06) 60%,transparent);transform-origin:top center;filter:drop-shadow(0 0 6px rgb(230 235 244/.8))}
+#vignette{inset:0;background:radial-gradient(ellipse 85% 80% at 50% 45%,transparent 55%,rgb(0 0 0/.75) 100%);pointer-events:none}
+#grain{inset:-200px;opacity:.07;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:512px}
+
+/* hud */
+#hud{inset:0;opacity:0}
+.hud-tl{left:64px;top:52px;display:flex;align-items:center;gap:14px;font-family:var(--display);font-size:24px;letter-spacing:-.01em}
+.hud-tl img{width:34px;height:34px}
+.hud-tr{right:64px;top:60px;display:flex;align-items:center;gap:12px;font-size:13px;color:var(--fog)}
+.live{width:8px;height:8px;border-radius:9px;background:var(--leaf);box-shadow:0 0 0 3px rgb(52 211 153/.16),0 0 10px rgb(52 211 153/.7)}
+.hud-bl{left:64px;bottom:52px;font-size:13px;color:var(--fog);display:flex;gap:16px;align-items:center}
+.hud-bl b{color:var(--navy);font-weight:500}
+.hud-bl i{display:inline-block;width:28px;height:1px;background:var(--pale)}
+.hud-br{right:64px;bottom:58px;width:240px;height:1px;background:rgb(255 255 255/.1)}
+.hud-br div{height:1px;background:#fff;box-shadow:0 0 8px rgb(230 235 244/.8);width:0}
+
+/* S1 */
+#s1-mark{left:50%;top:50%;width:300px;height:300px;margin:-150px 0 0 -150px}
+#s1-mark img{width:100%;height:100%;filter:drop-shadow(0 0 30px rgb(230 235 244/.35))}
+#s1-word{left:50%;top:50%;font-size:168px;letter-spacing:-.03em;white-space:nowrap}
+#s1-word span{display:inline-block}
+#s1-tag{left:0;right:0;top:640px;text-align:center;font-size:17px;color:var(--tide);letter-spacing:.32em}
+#s1-line{left:50%;top:540px;height:1px;width:1100px;margin-left:-550px;background:linear-gradient(90deg,transparent,rgb(255 255 255/.85),transparent);box-shadow:0 0 18px rgb(230 235 244/.6)}
+
+/* headings common */
+.eyebrow{display:flex;align-items:center;gap:14px;font-size:14px;color:var(--fog)}
+.eyebrow b{color:var(--navy);font-weight:500}
+.eyebrow i{display:inline-block;width:32px;height:1px;background:var(--pale)}
+
+/* S2 */
+#s2-h{left:160px;top:300px;font-size:92px;width:1700px;white-space:nowrap}
+.chips{left:160px;top:580px;display:flex;gap:18px}
+.chip{position:relative;padding:18px 26px;border:1px solid var(--line);border-radius:14px;background:rgb(13 14 16/.8);font-size:16px;color:var(--tide);box-shadow:inset 0 1px 0 rgb(255 255 255/.05)}
+.chip .x{color:var(--rose);margin-right:12px}
+.chip .strike{position:absolute;left:18px;right:18px;top:50%;height:2px;background:var(--rose);box-shadow:0 0 10px rgb(240 89 107/.6);transform-origin:left;transform:scaleX(0)}
+
+/* S3 */
+#s3-h{left:0;right:0;top:400px;text-align:center;font-size:110px}
+#s3-eyebrow{left:0;right:0;top:330px;justify-content:center}
+#s3-cam{left:0;top:0;width:1920px;height:1080px;perspective:2200px}
+#s3-frame{left:210px;top:270px;width:1500px;height:938px;border-radius:22px;overflow:hidden;border:1px solid rgb(255 255 255/.12);box-shadow:0 0 0 1px #000,0 60px 140px -30px #000,0 0 120px -40px rgb(230 235 244/.35);transform-origin:50% 0%;background:#000}
+#s3-frame .bar{height:44px;background:#0d0e10;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;padding:0 18px}
+#s3-frame .bar span{width:11px;height:11px;border-radius:9px;background:#26282d}
+#s3-frame .bar em{margin-left:20px;flex:0 0 420px;height:26px;border-radius:8px;background:#131417;font:400 13px var(--mono);color:var(--fog);font-style:normal;display:flex;align-items:center;padding-left:14px;letter-spacing:.02em}
+#s3-frame img{display:block;width:100%}
+#s3-fade{left:0;right:0;bottom:0;height:360px;background:linear-gradient(transparent,var(--canvas))}
+
+/* S4 */
+#s4-head{left:140px;top:150px}
+#s4-h{font-size:76px;margin-top:26px}
+#s4-card{left:140px;top:420px;width:640px;border-radius:24px;background:linear-gradient(180deg,#111215,#0b0c0e);border:1px solid rgb(255 255 255/.1);box-shadow:inset 0 1px 0 rgb(255 255 255/.06),0 40px 80px -30px #000,0 0 80px -40px rgb(230 235 244/.3);padding:26px 30px}
+.cthead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.cthead b{font-weight:600;font-size:20px}
+.cthead span{font:400 14px var(--mono);color:var(--fog)}
+.row{display:flex;align-items:center;justify-content:space-between;height:46px;border-top:1px solid var(--line);font:400 16px var(--mono);color:var(--tide)}
+.row .l{display:flex;align-items:center;gap:14px}
+.ck{width:18px;height:18px;position:relative}
+.ck svg{position:absolute;inset:0}
+.row .r{color:var(--fog);font-size:14px}
+.ok-row{display:flex;justify-content:space-between;height:46px;align-items:center;border-top:1px solid var(--line);font:400 15px var(--mono);color:var(--fog)}
+.ok-row b{color:var(--leaf);font-weight:500}
+#s4-deny{margin-top:12px;border-radius:14px;border:1px solid rgb(240 89 107/.28);background:rgb(240 89 107/.07);padding:16px 18px}
+#s4-deny .t{display:flex;justify-content:space-between;font:400 15px var(--mono);color:var(--navy)}
+#s4-deny .t b{color:var(--rose);font-weight:500}
+#s4-deny p{margin-top:8px;font-size:14px;color:var(--tide)}
+#s4-persp{left:0;top:0;width:1920px;height:1080px;perspective:2000px}
+#s4-table{left:870px;top:330px;width:1180px;border-radius:20px;overflow:hidden;box-shadow:0 50px 120px -30px #000,0 0 0 1px rgb(255 255 255/.06);transform-origin:0% 50%}
+#s4-table img{display:block;width:100%}
+
+/* S5 */
+#s5-head{left:140px;top:150px}
+#s5-h{font-size:76px;margin-top:26px}
+#s5-persp{left:0;top:0;width:1920px;height:1080px;perspective:2400px}
+#s5-panel{left:140px;top:460px;width:1640px;border-radius:22px;overflow:hidden;box-shadow:0 50px 120px -30px #000,0 0 0 1px rgb(255 255 255/.06),0 0 120px -50px rgb(230 235 244/.35);transform-origin:50% 0%}
+#s5-panel img{display:block;width:100%}
+.s5-chips{left:140px;top:370px;display:flex;gap:14px}
+.s5-chips .chip{padding:12px 18px;font-size:13px;border-radius:999px}
+.s5-chips .chip b{color:var(--navy);font-weight:500;margin-right:10px}
+#s5-price{right:140px;top:190px;text-align:right}
+#s5-price .n{font-family:var(--display);font-size:120px;letter-spacing:-.04em;line-height:1}
+#s5-price .n small{font-size:34px;color:var(--tide);letter-spacing:-.02em;margin-left:8px}
+#s5-price .c{font-size:13px;color:var(--leaf);margin-bottom:12px}
+
+/* S6 */
+#s6-head{left:0;right:0;top:110px;text-align:center}
+#s6-head .eyebrow{justify-content:center}
+#s6-h{font-size:76px;margin-top:24px}
+#s6-persp{left:0;top:0;width:1920px;height:1080px;perspective:1800px}
+.pcard{top:315px;width:520px;height:640px;border-radius:24px;overflow:hidden;border:1px solid rgb(255 255 255/.1);background:#060607 no-repeat;background-image:url(a/p-products.png);background-size:1560px auto;box-shadow:0 50px 100px -30px #000,0 0 80px -40px rgb(230 235 244/.25)}
+.pcard .tag{position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(transparent,#060607)}
+
+/* S7 */
+#s7-head{left:140px;top:170px}
+#s7-h{font-size:84px;margin-top:26px}
+#s7-tiles{left:140px;top:520px;width:1640px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border-radius:24px;overflow:hidden;background:var(--line);border:1px solid var(--line)}
+.tile{background:#08090a;padding:34px 34px 40px;height:230px;position:relative}
+.tile .k{font-size:13px;color:var(--fog)}
+.tile .v{font-family:var(--mono);font-size:58px;margin-top:40px;letter-spacing:-.02em}
+.tile .s{font-size:15px;color:var(--fog);margin-top:14px}
+#s7-std{left:140px;top:820px;display:flex;gap:14px}
+#s7-std .chip{font:400 15px var(--mono);border-radius:999px;padding:12px 20px;color:var(--tide)}
+
+/* S8 */
+#s8-rings{left:50%;top:400px;width:640px;height:640px;margin:-320px 0 0 -320px}
+#s8-mark{left:50%;top:400px;width:230px;height:230px;margin:-115px 0 0 -115px}
+#s8-mark img{width:100%;height:100%;filter:drop-shadow(0 0 34px rgb(230 235 244/.4))}
+#s8-word{left:0;right:0;top:700px;text-align:center;font-size:96px;letter-spacing:-.03em}
+#s8-tag{left:0;right:0;top:830px;text-align:center;font-size:30px;color:var(--tide);letter-spacing:-.01em}
+#s8-url{left:0;right:0;top:910px;display:flex;justify-content:center;gap:16px;align-items:center;font-size:15px;color:var(--fog)}
+#s8-url b{color:var(--navy);font-weight:500}
+#black{inset:0;background:#000;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="abs" id="bg"></div>
+  <div class="abs" id="glow"></div>
+  <div class="abs" id="horizon"></div>
+  <div class="abs" id="beam"></div>
+
+  <!-- S1: mark + wordmark -->
+  <section class="scene" id="s1">
+    <div class="abs" id="s1-line"></div>
+    <div class="abs" id="s1-mark"><img src="a/mark.png"></div>
+    <div class="abs display" id="s1-word">Precursor</div>
+    <div class="abs mono" id="s1-tag">Equity infrastructure for the companies that come next</div>
+  </section>
+
+  <!-- S2: problem -->
+  <section class="scene" id="s2">
+    <div class="abs eyebrow mono" style="left:160px;top:220px"><b>01</b><i></i>The problem</div>
+    <div class="abs display" id="s2-h">
+      <span class="line split">Private companies stay private longer.</span>
+      <span class="line split accent">Their shareholders still can't sell.</span>
+    </div>
+    <div class="abs chips">
+      <div class="chip mono"><span class="x">×</span>Cap tables in spreadsheets<div class="strike"></div></div>
+      <div class="chip mono"><span class="x">×</span>Transfers take weeks<div class="strike"></div></div>
+      <div class="chip mono"><span class="x">×</span>Opaque secondary prices<div class="strike"></div></div>
+    </div>
+  </section>
+
+  <!-- S3: solution + hero preview -->
+  <section class="scene" id="s3">
+    <div class="abs eyebrow mono" id="s3-eyebrow"><span class="live"></span><b>Live on Robinhood Chain</b></div>
+    <div class="abs display" id="s3-h">
+      <span class="line split">Private company shares, issued on-chain.</span>
+      <span class="line split accent">With the rules built in.</span>
+    </div>
+    <div class="abs" id="s3-cam">
+      <div class="abs" id="s3-frame">
+        <div class="bar"><span></span><span></span><span></span><em>useprecursor.xyz</em></div>
+        <img src="a/home.png">
+      </div>
+    </div>
+    <div class="abs" id="s3-fade"></div>
+  </section>
+
+  <!-- S4: transfer rules -->
+  <section class="scene" id="s4">
+    <div class="abs" id="s4-persp"><div class="abs" id="s4-table"><img src="a/p-modules.png"></div></div>
+    <div class="abs" id="s4-head">
+      <div class="eyebrow mono"><b>02</b><i></i>Transfer rules</div>
+      <div class="display" id="s4-h">
+        <span class="line split">Every transfer is checked.</span>
+        <span class="line split accent">Every answer has a code.</span>
+      </div>
+    </div>
+    <div class="abs" id="s4-card">
+      <div class="cthead"><b>canTransfer</b><span>500 NWL-B</span></div>
+      <div id="s4-rows"></div>
+      <div class="ok-row" id="s4-ok"><span>0x71c3…9e4a → 0xb02f…17d3</span><b>OK</b></div>
+      <div id="s4-deny">
+        <div class="t"><span><span style="color:var(--rose)">×</span>&nbsp; 0x71c3…9e4a → 0x4e88…c0b1</span><b>NOT_ELIGIBLE</b></div>
+        <p>Stopped at EligibilityModule, before anyone signs.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- S5: liquidity -->
+  <section class="scene" id="s5">
+    <div class="abs" id="s5-head">
+      <div class="eyebrow mono"><b>03</b><i></i>Capital and liquidity</div>
+      <div class="display" id="s5-h">
+        <span class="line split">Raise and sell on a schedule</span>
+        <span class="line split accent">the company sets.</span>
+      </div>
+    </div>
+    <div class="abs" id="s5-persp"><div class="abs" id="s5-panel"><img src="a/p-clearing.png"></div></div>
+    <div class="abs s5-chips">
+      <div class="chip mono"><b>Offerings</b>OfferingVault</div>
+      <div class="chip mono"><b>Liquidity Windows</b>LiquidityWindow</div>
+      <div class="chip mono"><b>RFQ</b>RFQSettlement</div>
+      <div class="chip mono"><b>Permissioned pools</b>PoolGate</div>
+    </div>
+  </section>
+
+  <!-- S6: three surfaces -->
+  <section class="scene" id="s6">
+    <div class="abs" id="s6-head">
+      <div class="eyebrow mono"><b>04</b><i></i>Products</div>
+      <div class="display" id="s6-h">
+        <span class="line split">One record of ownership,</span>
+        <span class="line split">seen from <span class="accent">three sides.</span></span>
+      </div>
+    </div>
+    <div class="abs" id="s6-persp">
+      <div class="abs pcard" style="background-position:-14px -14px"><div class="tag"></div></div>
+      <div class="abs pcard" style="background-position:-520px -14px"><div class="tag"></div></div>
+      <div class="abs pcard" style="background-position:-1026px -14px"><div class="tag"></div></div>
+    </div>
+  </section>
+
+  <!-- S7: chain -->
+  <section class="scene" id="s7">
+    <div class="abs" id="s7-head">
+      <div class="eyebrow mono"><b>05</b><i></i>Robinhood Chain</div>
+      <div class="display" id="s7-h">
+        <span class="line split">Built on the chain where</span>
+        <span class="line split accent">stock tokens already live.</span>
+      </div>
+    </div>
+    <div class="abs" id="s7-tiles">
+      <div class="tile"><div class="k mono">Stack</div><div class="v">Arbitrum</div><div class="s">EVM compatible, sub-second</div></div>
+      <div class="tile"><div class="k mono">Settles to</div><div class="v">Ethereum</div><div class="s">Arbitrum stack, L1 security</div></div>
+      <div class="tile"><div class="k mono">Gas for holders</div><div class="v" id="s7-gas">$0</div><div class="s">Sponsored for every holder</div></div>
+      <div class="tile"><div class="k mono">Settlement</div><div class="v">USDG</div><div class="s">Shares and cash, one transaction</div></div>
+    </div>
+    <div class="abs" id="s7-std">
+      <div class="chip">ERC-20</div><div class="chip">ERC-3643</div><div class="chip">ERC-8056</div><div class="chip">Chainlink feeds</div>
+    </div>
+  </section>
+
+  <!-- S8: outro -->
+  <section class="scene" id="s8">
+    <svg class="abs" id="s8-rings" viewBox="0 0 640 640">
+      <circle cx="320" cy="320" r="150" fill="none" stroke="#fff" stroke-opacity=".1" stroke-width="1.25" id="r1"/>
+      <circle cx="320" cy="320" r="214" fill="none" stroke="#fff" stroke-opacity=".07" stroke-width="1.25" id="r2"/>
+      <circle cx="320" cy="320" r="296" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="1" stroke-dasharray="2 9" id="r3"/>
+      <g id="orbit" style="transform-origin:320px 320px">
+        <circle cx="320" cy="320" r="214" fill="none" stroke="#fff" stroke-opacity=".85" stroke-width="2" stroke-dasharray="220 1125" stroke-linecap="round"/>
+        <circle cx="534" cy="320" r="4" fill="#fff" style="filter:drop-shadow(0 0 6px rgb(230 235 244/.9))"/>
+      </g>
+    </svg>
+    <div class="abs" id="s8-mark"><img src="a/mark.png"></div>
+    <div class="abs display" id="s8-word">Precursor</div>
+    <div class="abs" id="s8-tag">Equity infrastructure for the companies that come next.</div>
+    <div class="abs mono" id="s8-url"><span class="live"></span><b>useprecursor.xyz</b></div>
+  </section>
+
+  <!-- HUD -->
+  <div class="abs" id="hud">
+    <div class="abs hud-tl"><img src="a/mark.png">Precursor</div>
+    <div class="abs hud-tr mono"><span class="live"></span><span style="color:var(--navy)">Live on Robinhood Chain</span></div>
+    <div class="abs hud-bl mono"><b id="hud-n">01</b><i></i><span id="hud-l">The problem</span></div>
+    <div class="abs hud-br"><div id="hud-p"></div></div>
+  </div>
+
+  <div class="abs" id="vignette"></div>
+  <div class="abs" id="grain"></div>
+  <div class="abs" id="black"></div>
+</div>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const P = (t, a, b) => cl((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const eo = (x) => 1 - Math.pow(1 - x, 4);
+const ex = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
+const eio = (x) => (x < 0.5 ? 8 * x ** 4 : 1 - Math.pow(-2 * x + 2, 4) / 2);
+const ei = (x) => x * x * x;
+const set = (el, s) => Object.assign(el.style, s);
+
+/* split .split lines into words */
+$$(".split").forEach((line) => {
+  const walk = (node) => {
+    [...node.childNodes].forEach((n) => {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) frag.appendChild(document.createTextNode(part));
+          else { const s = document.createElement("span"); s.className = "w"; s.textContent = part; frag.appendChild(s); }
+        });
+        n.replaceWith(frag);
+      } else walk(n);
+    });
+  };
+  walk(line);
+});
+/* wordmark letters */
+const word = $("#s1-word");
+word.innerHTML = [...word.textContent].map((c) => `<span>${c}</span>`).join("");
+
+/* canTransfer rows */
+const RULES = ["Token not paused", "Sender identity", "Recipient identity", "RegionModule", "EligibilityModule", "HoldingPeriodModule"];
+$("#s4-rows").innerHTML = RULES.map((r) => `<div class="row"><div class="l"><div class="ck"><svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="7" fill="none" stroke="#43464d" stroke-width="1.5" stroke-dasharray="30 14" class="spin"/><path d="M4 9.5l3.2 3L14 5.5" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="16" stroke-dashoffset="16" class="tick"/></svg></div>${r}</div><span class="r">pass</span></div>`).join("");
+
+/* reveal words of a container: start time, stagger */
+function words(el, t, start, stagger = 0.045, dur = 0.9, out = null) {
+  $$(".w", el).forEach((w, i) => {
+    const k = ex(P(t, start + i * stagger, start + i * stagger + dur));
+    let y = (1 - k) * 110, o = k, bl = (1 - k) * 8;
+    if (out) {
+      const q = eio(P(t, out + i * 0.02, out + i * 0.02 + 0.6));
+      y -= q * 110; o *= 1 - q;
+    }
+    set(w, { transform: `translateY(${y}%)`, opacity: o, filter: bl > 0.05 ? `blur(${bl}px)` : "none" });
+  });
+}
+function fadeUp(el, t, a, b, dist = 30) {
+  const k = eo(P(t, a, b));
+  set(el, { opacity: k, transform: `translateY(${(1 - k) * dist}px)` });
+}
+function scene(el, t, a, b, fin = 0.4, fout = 0.5) {
+  const vis = t >= a - 0.01 && t <= b + 0.01;
+  const o = vis ? Math.min(P(t, a, a + fin), 1 - P(t, b - fout, b)) : 0;
+  el.style.opacity = o;
+  el.style.display = vis ? "block" : "none";
+  return o;
+}
+
+const SECTIONS = [
+  [5.0, "01", "The problem"], [10.2, "02", "Introducing Precursor"], [16.2, "03", "Transfer rules"],
+  [22.2, "04", "Capital and liquidity"], [27.8, "05", "Products"], [32.4, "06", "Robinhood Chain"],
+];
+
+window.render = function (t) {
+  /* ---------- atmosphere ---------- */
+  const gA = P(t, 0, 1.6);
+  // horizon: rises behind the mark, sinks and dims under the content, rises again for the outro
+  const KF = [[0, 560, 0], [3.2, 150, 1], [4.6, 170, 1], [6.0, 300, 0.55], [35.8, 280, 0.6], [38.6, 215, 0.95], [40, 205, 0.95]];
+  let bgY = KF[0][1], bgO = KF[0][2];
+  for (let i = 0; i < KF.length - 1; i++) {
+    const [ta, ya, oa] = KF[i], [tb, yb, ob] = KF[i + 1];
+    if (t >= ta && t <= tb) { const k = eio(P(t, ta, tb)); bgY = lerp(ya, yb, k); bgO = lerp(oa, ob, k); }
+  }
+  set($("#bg"), { opacity: bgO, transform: `translate(${Math.sin(t * 0.12) * 14}px, ${bgY}px) scale(${1.02 + t * 0.0015})` });
+  const gx = 960 + Math.sin(t * 0.25) * 260, gy = 260 + Math.cos(t * 0.2) * 120;
+  set($("#glow"), { left: gx - 750 + "px", top: gy - 550 + "px", opacity: 0.35 * gA });
+  $("#horizon").style.opacity = eo(P(t, 0.3, 1.5));
+  $("#horizon").style.transform = `scaleX(${eo(P(t, 0.3, 1.5))})`;
+  set($("#beam"), { transform: `rotate(${56 + Math.sin(t * 0.3) * 3}deg)`, opacity: 0.25 * P(t, 0.8, 2.4) });
+  $("#grain").style.transform = `translate(${((t * 977) % 1) * 160 - 80}px, ${((t * 613) % 1) * 160 - 80}px)`;
+
+  /* ---------- HUD ---------- */
+  const hudO = Math.min(P(t, 5.2, 5.9), 1 - P(t, 35.8, 36.4));
+  $("#hud").style.opacity = hudO;
+  let sec = SECTIONS[0];
+  for (const s of SECTIONS) if (t >= s[0]) sec = s;
+  $("#hud-n").textContent = sec[1]; $("#hud-l").textContent = sec[2];
+  $("#hud-p").style.width = cl((t - 5) / 31.4) * 100 + "%";
+
+  /* ---------- S1 0 - 5.2 ---------- */
+  if (scene($("#s1"), t, 0, 5.3, 0.01, 0.7) > 0) {
+    const mk = eo(P(t, 0.5, 2.2));
+    const shift = eio(P(t, 2.0, 3.0));
+    const wordW = word.offsetWidth, gap = 40, mW = 170;
+    const total = mW + gap + wordW;
+    const markX = lerp(0, -total / 2 + mW / 2, shift);
+    const mScale = lerp(lerp(0.55, 1.05, mk), mW / 300, shift);
+    set($("#s1-mark"), {
+      opacity: mk, filter: `blur(${(1 - mk) * 18}px)`,
+      transform: `translateX(${markX}px) translateY(${(1 - mk) * 60 - 14 * shift}px) rotate(${(1 - mk) * -28}deg) scale(${mScale})`,
+    });
+    set(word, { transform: `translate(${-total / 2 + mW + gap}px, -58%)` });
+    [...word.children].forEach((c, i) => {
+      const k = ex(P(t, 2.35 + i * 0.05, 2.35 + i * 0.05 + 0.8));
+      set(c, { opacity: k, transform: `translateY(${(1 - k) * 60}px)`, filter: `blur(${(1 - k) * 10}px)` });
+    });
+    const lk = P(t, 0.2, 1.8);
+    set($("#s1-line"), { transform: `scaleX(${eo(lk)})`, opacity: Math.sin(lk * Math.PI) * 0.9 + 0.25 * P(t, 1.8, 3) * (1 - P(t, 3, 4)) });
+    const tg = eo(P(t, 3.1, 4.1));
+    set($("#s1-tag"), { opacity: tg, letterSpacing: lerp(0.6, 0.32, tg) + "em", transform: `translateY(${(1 - tg) * 12}px)` });
+    const outk = ei(P(t, 4.5, 5.3));
+    set($("#s1"), { transform: `scale(${1 + outk * 0.12})`, filter: outk > 0.01 ? `blur(${outk * 14}px)` : "none" });
+  }
+
+  /* ---------- S2 5 - 10.4 ---------- */
+  if (scene($("#s2"), t, 5.0, 10.5, 0.3, 0.6) > 0) {
+    const ls = $$("#s2-h .line");
+    words(ls[0], t, 5.3, 0.06, 0.9);
+    words(ls[1], t, 6.4, 0.06, 0.9);
+    fadeUp($("#s2 .eyebrow"), t, 5.2, 6.0, 14);
+    $$("#s2 .chip").forEach((c, i) => {
+      const k = eo(P(t, 7.5 + i * 0.18, 8.3 + i * 0.18));
+      set(c, { opacity: k, transform: `translateY(${(1 - k) * 30}px) scale(${0.96 + 0.04 * k})` });
+      const st = eio(P(t, 8.5 + i * 0.2, 9.0 + i * 0.2));
+      $(".strike", c).style.transform = `scaleX(${st})`;
+      c.style.color = st > 0.5 ? "var(--fog)" : "var(--tide)";
+    });
+    const o = eio(P(t, 9.8, 10.5));
+    set($("#s2"), { transform: `translateY(${-o * 60}px)` });
+  }
+
+  /* ---------- S3 10.2 - 16.4 ---------- */
+  if (scene($("#s3"), t, 10.2, 16.5, 0.2, 0.6) > 0) {
+    const ls = $$("#s3-h .line");
+    words(ls[0], t, 10.4, 0.06, 0.9);
+    words(ls[1], t, 11.1, 0.07, 0.9);
+    fadeUp($("#s3-eyebrow"), t, 10.4, 11.2, 14);
+    // heading moves up as browser rises
+    const up = eio(P(t, 12.3, 13.4));
+    set($("#s3-h"), { transform: `translateY(${-up * 160}px) scale(${1 - up * 0.1})`, opacity: 1 - up, filter: up > 0.01 ? `blur(${up * 10}px)` : "none" });
+    set($("#s3-eyebrow"), { transform: `translateY(${-up * 225}px)`, opacity: 1 - up });
+    // browser frame
+    const r = eo(P(t, 12.4, 14.0));
+    const push = eio(P(t, 14.1, 16.2));
+    const rx = lerp(42, 10, r) - push * 10;
+    const ty = lerp(700, 0, r) - push * 120;
+    const sc = lerp(0.9, 1, r) * (1 + push * 0.75);
+    const txp = -push * 520;
+    set($("#s3-frame"), { opacity: P(t, 12.4, 12.9), transform: `translate(${txp}px, ${ty}px) rotateX(${rx}deg) scale(${sc})` });
+    $("#s3-fade").style.opacity = 1 - push * 0.6;
+  }
+
+  /* ---------- S4 16.2 - 22.4 ---------- */
+  if (scene($("#s4"), t, 16.2, 22.5, 0.3, 0.6) > 0) {
+    const ls = $$("#s4-h .line");
+    fadeUp($("#s4-head .eyebrow"), t, 16.3, 17.0, 14);
+    words(ls[0], t, 16.4, 0.06, 0.9);
+    words(ls[1], t, 16.9, 0.06, 0.9);
+    const ck = eo(P(t, 16.8, 17.8));
+    set($("#s4-card"), { opacity: ck, transform: `translateY(${(1 - ck) * 60}px)` });
+    $$("#s4-rows .row").forEach((row, i) => {
+      const s = 17.6 + i * 0.32;
+      const spin = $(".spin", row), tick = $(".tick", row);
+      const done = P(t, s + 0.25, s + 0.5);
+      spin.style.opacity = t < s ? 0.5 : 1 - done;
+      spin.setAttribute("transform", `rotate(${t * 520} 9 9)`);
+      tick.style.strokeDashoffset = 16 * (1 - eo(done));
+      row.style.color = done > 0.5 ? "var(--navy)" : "var(--tide)";
+      $(".r", row).style.opacity = done;
+    });
+    const ok = eo(P(t, 19.7, 20.2));
+    set($("#s4-ok"), { opacity: ok });
+    const dn = eo(P(t, 20.3, 20.9));
+    set($("#s4-deny"), { opacity: dn, transform: `translateY(${(1 - dn) * 16}px)` });
+    const shake = P(t, 20.3, 20.75);
+    $("#s4-deny").style.marginLeft = Math.sin(shake * Math.PI * 6) * (1 - shake) * 8 + "px";
+    // table
+    const tk = eo(P(t, 16.6, 18.2));
+    const drift = P(t, 16.6, 22.5);
+    set($("#s4-table"), { opacity: tk, transform: `translateX(${(1 - tk) * 400 - drift * 40}px) rotateY(${lerp(-38, -16, tk) + drift * 4}deg) scale(${0.9 + drift * 0.04})` });
+    const out = eio(P(t, 21.9, 22.5));
+    set($("#s4"), { transform: `translateX(${-out * 80}px)` });
+  }
+
+  /* ---------- S5 22.2 - 28 ---------- */
+  if (scene($("#s5"), t, 22.2, 28.0, 0.3, 0.6) > 0) {
+    const ls = $$("#s5-h .line");
+    fadeUp($("#s5-head .eyebrow"), t, 22.3, 23.0, 14);
+    words(ls[0], t, 22.4, 0.06, 0.9);
+    words(ls[1], t, 22.9, 0.07, 0.9);
+    const pk = eo(P(t, 23.0, 24.6));
+    const drift = P(t, 23.0, 28);
+    set($("#s5-panel"), { opacity: pk, transform: `translateY(${(1 - pk) * 260}px) rotateX(${lerp(48, 6, pk) - drift * 4}deg) scale(${0.94 + drift * 0.05})` });
+    $$(".s5-chips .chip").forEach((c, i) => {
+      const k = eo(P(t, 23.3 + i * 0.14, 24.1 + i * 0.14));
+      set(c, { opacity: k, transform: `translateY(${(1 - k) * 24}px)` });
+    });
+    const out = eio(P(t, 27.4, 28));
+    set($("#s5"), { transform: `scale(${1 - out * 0.05})` });
+  }
+
+  /* ---------- S6 27.8 - 32.6 ---------- */
+  if (scene($("#s6"), t, 27.8, 32.6, 0.3, 0.6) > 0) {
+    const ls = $$("#s6-h .line");
+    fadeUp($("#s6-head .eyebrow"), t, 27.9, 28.6, 14);
+    words(ls[0], t, 28.0, 0.06, 0.9);
+    words(ls[1], t, 28.4, 0.07, 0.9);
+    $$(".pcard").forEach((c, i) => {
+      const k = eo(P(t, 28.5 + i * 0.22, 29.9 + i * 0.22));
+      const flat = eio(P(t, 30.2, 31.4));
+      const d = i - 1;
+      const x = 960 - 260 + d * lerp(470, 560, flat);
+      const ry = lerp(d * -22, d * -6, flat);
+      const z = lerp(d === 0 ? 60 : -80, 0, flat);
+      set(c, {
+        left: x + "px", opacity: k,
+        transform: `translateY(${(1 - k) * 340 + Math.abs(d) * lerp(30, 0, flat)}px) translateZ(${z}px) rotateY(${ry}deg) rotateX(${(1 - k) * 30}deg)`,
+      });
+    });
+    const out = eio(P(t, 32.0, 32.6));
+    set($("#s6"), { transform: `translateY(${-out * 60}px)` });
+  }
+
+  /* ---------- S7 32.4 - 36.6 ---------- */
+  if (scene($("#s7"), t, 32.4, 36.6, 0.3, 0.6) > 0) {
+    const ls = $$("#s7-h .line");
+    fadeUp($("#s7-head .eyebrow"), t, 32.5, 33.2, 14);
+    words(ls[0], t, 32.55, 0.06, 0.9);
+    words(ls[1], t, 32.95, 0.06, 0.9);
+    const tl = eo(P(t, 33.2, 34.0));
+    set($("#s7-tiles"), { opacity: tl, transform: `translateY(${(1 - tl) * 40}px)` });
+    $$("#s7-tiles .tile").forEach((c, i) => {
+      const k = eo(P(t, 33.3 + i * 0.12, 34.1 + i * 0.12));
+      $(".v", c).style.opacity = k;
+      $(".v", c).style.transform = `translateY(${(1 - k) * 30}px)`;
+    });
+    $$("#s7-std .chip").forEach((c, i) => {
+      const k = eo(P(t, 34.2 + i * 0.1, 34.9 + i * 0.1));
+      set(c, { opacity: k, transform: `translateY(${(1 - k) * 16}px)` });
+    });
+    const out = ei(P(t, 36.0, 36.6));
+    set($("#s7"), { filter: out > 0.01 ? `blur(${out * 10}px)` : "none", transform: `scale(${1 - out * 0.04})` });
+  }
+
+  /* ---------- S8 36.4 - 40 ---------- */
+  if (scene($("#s8"), t, 36.4, 40.2, 0.3, 0.01) > 0) {
+    const mk = eo(P(t, 36.5, 37.7));
+    set($("#s8-mark"), { opacity: mk, transform: `translateY(${(1 - mk) * 40}px) rotate(${(1 - mk) * -20}deg) scale(${0.7 + 0.3 * mk})`, filter: `blur(${(1 - mk) * 12}px)` });
+    const rk = eo(P(t, 36.6, 38.0));
+    set($("#s8-rings"), { opacity: rk, transform: `scale(${0.75 + 0.25 * rk})` });
+    $("#orbit").style.transform = `rotate(${-40 + t * 40}deg)`;
+    $("#orbit").style.opacity = P(t, 37.2, 37.8);
+    word8.forEach((c, i) => {
+      const k = ex(P(t, 37.2 + i * 0.04, 37.9 + i * 0.04));
+      set(c, { opacity: k, transform: `translateY(${(1 - k) * 40}px)`, filter: `blur(${(1 - k) * 8}px)` });
+    });
+    fadeUp($("#s8-tag"), t, 37.9, 38.7, 16);
+    fadeUp($("#s8-url"), t, 38.3, 39.0, 12);
+  }
+  $("#black").style.opacity = ei(P(t, 39.3, 40));
+};
+
+const w8 = $("#s8-word");
+w8.innerHTML = [...w8.textContent].map((c) => `<span style="display:inline-block">${c}</span>`).join("");
+const word8 = [...w8.children];
+
+window.ready = Promise.all([document.fonts.ready, ...$$("img").map((i) => i.decode().catch(() => {}))]).then(() => { render(0); return true; });
+const qs = new URLSearchParams(location.search);
+if (qs.has("t")) window.ready.then(() => render(+qs.get("t")));
+else if (qs.has("play")) window.ready.then(() => { const t0 = performance.now(); const loop = () => { render(((performance.now() - t0) / 1000) % 40); requestAnimationFrame(loop); }; loop(); });
+</script>
+</body>
+</html>
