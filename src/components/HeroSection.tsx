@@ -40,6 +40,9 @@ export function HeroSection() {
             transfer runs the company&apos;s rules before it settles, and every issuance, offering and corporate action is
             recorded where anyone can verify it.
           </p>
+          <p className="animate-reveal delay-2 mt-7 max-w-[580px] text-[15px] leading-[1.65] text-tide md:text-[15px]">
+            $PRECURSOR: 0x825e3b2432fb4f642279456c51876ad61fcf854d
+          </p>
 
           <div className="animate-reveal delay-3 mt-10 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
             <Link href={SITE.appHref} className="btn btn-primary btn-lg">
